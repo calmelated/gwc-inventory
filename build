@@ -1,0 +1,166 @@
+#!/bin/sh
+
+cur_path="`pwd`"
+prj_path="`dirname $cur_path`"
+prj_name="`basename $cur_path`"
+src="$prj_path/$prj_name"
+dst="$prj_path/$prj_name.build"
+findir="result"
+dbuser="aclor_root"
+dbpass="4c10r8888"
+dbname="aclor_website"
+dbtable=""
+dbbackup="aclor_inventory.sql"
+
+prj_clear() {
+    # Remomve redundancy
+    rm -f *.log
+    rm -rf $src/$findir
+    rm -fr $dst/upload/*
+    rm -f  $dst/build
+    rm -f  $dst/$findir.zip
+    rm -f  $src/$findir.zip
+    rm -f  $dst/shortcut
+    rm -f  $dst/screw
+    rm -f  $dst/appliaction/logs/*.php
+}
+
+prj_sql_backup() {
+    # For backup database
+    #mysqldump -u $dbuser -p$dbpass --all-databases   > $dst/$dbbackup # backup for all
+    #mysqldump -u $dbuser -p$dbpass $dbname           > $dst/$dbbackup
+    mysqldump  -u $dbuser -p$dbpass $dbname --no-data > $dst/$dbbackup
+    #mysqldump -u $dbuser -p$dbpass $dbname $dbtable  > $dst/$dbbackup
+
+    # For database resotre
+    #mysql -u $dbuser -p$dbpass < $dbbackup
+}
+
+prj_code_compress() {
+    [ ! -d $dst ] && cp -afR $src $dst
+
+    # php files compress
+    for f in `find $dst/application/views       -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+    for f in `find $dst/application/controllers -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+    for f in `find $dst/application/models      -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+    for f in `find $dst/tests/models            -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+    for f in `find $dst/tests/system            -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+    for f in `find $dst/tests/libs              -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+    for f in `find $dst/tests/controllers       -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+    for f in `find $dst/tests/helpers           -name '*.php'` ; do php -w $f > $f.zipped ; mv $f.zipped $f ; done
+
+    # javascript files compress
+    [ ! -x `which minijs` ] && echo "Please install Google Clouser firstly !" && exit 1
+    f=$dst/script/products.js ; minijs $f ; mv $f.mini $f
+    f=$dst/script/script.js ; minijs $f ; mv $f.mini $f
+}
+
+prj_chkstyle() {
+    # Check javascript code
+    if [ "$1" = "" -o "$1" = "js" ]; then
+        local jslog="js-chklist.log"
+        rm -f $jslog
+        for f in `find $src/script -name '*.js'` ; do
+            [ "`echo $f|grep tiny_mce`"     != "" ] && continue;
+            [ "`echo $f|grep jquery`"       != "" ] && continue;
+            [ "`echo $f|grep mootools`"     != "" ] && continue;
+            [ "`echo $f|grep jqgalscroll`"  != "" ] && continue;
+            [ "`echo $f|grep caption`"      != "" ] && continue;
+            jshint $f >> $jslog
+            #echo >> $jslog
+        done
+        if [ "`grep error $jslog`" != "" ]; then
+            echo "There are some Javascript Errors !! Please see $jslog "
+        fi
+    fi
+
+    # Check PHP code
+    if [ "$1" = "12" -o "$1" = "php" ]; then
+        local phplog="php-chklist.log"
+        rm -f $phplog
+
+        local dlist="application/controllers"
+        dlist="$dlist application/views"
+        dlist="$dlist application/models"
+        dlist="$dlist tests/models"
+        dlist="$dlist tests/system"
+        dlist="$dlist tests/libs"
+        dlist="$dlist tests/controllers"
+        dlist="$dlist tests/helpers"
+        for dir in $dlist; do
+            for f in `find $src/$dir -name '*.php'` ; do
+                if [ "$dir" = "application/views" ]; then
+                    phpcs --standard=phprules.xml $f |
+                        grep -v '^$' |
+                        grep -v '\-\-\-\-\-\-\-\-\-\-\-' |
+                        grep -v 'ERROR(S) AFFECTING' |
+                        grep -v ', Memory:' |
+                        grep -v 'spaces but found' |
+                        grep -v 'Closing brace must be on a line by itself' |
+                        grep -v 'Expected "if (' |
+                        grep -v 'Expected "foreach (' |
+                        grep -v 'Line indented incorrectly; expected' |
+                        grep -v 'Multi-line function call not indented correctly;' >> $phplog
+                elif [ "`echo $f|grep controllers/botdetect`" != "" ]; then
+                    continue
+                else
+                    phpcs --standard=phprules.xml $f |
+                        grep -v '^$' |
+                        grep -v '\-\-\-\-\-\-\-\-\-\-\-' |
+                        grep -v 'ERROR(S) AFFECTING' |
+                        grep -v ', Memory:' >> $phplog
+                fi
+                echo "" >> $phplog
+            done
+        done
+        if [ "`grep error $phplog`" != "" ]; then
+            echo "There are some PHP Errors !! Please see $phplog "
+        fi
+    fi
+}
+
+prj_release() {
+    prj_clear
+
+    # Copy from production code
+    cp -afR $src $dst
+
+    # Modify config & compress code
+    mv $dst/application/config/config.fin.php  $dst/application/config/config.php
+    sed -i s/"define('ENVIRONMENT', 'development');"/"define('ENVIRONMENT', 'production');"/g $dst/index.php
+    prj_code_compress
+
+    # Finally, move back to source project
+    mv $dst $src/$findir
+    zip -r $findir.zip $findir > /dev/null 2>&1
+
+    echo "Before release to customer, check following config !! "
+    echo " * application/config/config.php"
+    echo " * application/config/config.fin.php"
+    echo " * shortcut"
+    echo " * index.php"
+    echo " * .htaccess"
+}
+
+prj_dev() {
+    prj_clear
+    prj_chkstyle "$1"
+}
+
+prj_help () {
+    echo "Usage:"
+    echo " $0 clear : clean no necessary codes in project"
+    echo " $0 dev [js|php]: force code syntax/coding style check before releaing to customer"
+    echo " $0 release : relase compressed code for customer "
+}
+
+#echo 0:$0,1:$1,2:$2,3:$3
+if [ "$1" = "clear" ]; then
+    prj_clear
+elif [ "$1" = "dev" ]; then
+    prj_dev "$2"
+elif [ "$1" = "release" ]; then
+    prj_release
+else
+    prj_help
+fi

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+alias toapp="cd \`ciprj\`/application/"
+alias tocon="cd \`ciprj\`/application/controllers/"
+alias toview="cd \`ciprj\`/application/views/"
+alias tocfg="cd \`ciprj\`/application/config/"
+alias tomode="cd \`ciprj\`/application/models/"
+alias tolog="cd \`ciprj\`/application/logs"
+alias totest="cd \`ciprj\`/tests"
+alias to="cd \`ciprj\`"
+alias tosys="cd \`ciprj\`/system"
