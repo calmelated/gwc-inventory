@@ -23,6 +23,7 @@ prj_clear() {
     rm -f  $dst/shortcut
     rm -f  $dst/screw
     rm -f  $dst/appliaction/logs/*.php
+    rm -f  $dst/appliaction/logs/*.log
 }
 
 prj_sql_backup() {

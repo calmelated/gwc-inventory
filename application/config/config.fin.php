@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url'] = 'http://aclor.com/inventory';
+$config['base_url'] = 'http://www.aclor.com/inventory';
 
 /*
 |--------------------------------------------------------------------------

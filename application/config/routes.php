@@ -39,8 +39,16 @@
 */
 
 //$route['(:any)'] = 'system/fix';
-$route['default_controller'] = 'inventory';
-//$route['default_controller'] = 'pages/view';
+$route['api/projects/$(:any)/(:any)'] = 'api/projects/$1/$2';
+//$route['api/projects/$(:any)'] = 'api/projects/$1';
+//$route['api/projects/edit/(:any)'] = 'api/projects/edit/$1';
+//$route['api/projects/save/(:any)'] = 'api/projects/save/$1';
+//$route['api/projects/save'] = 'api/projects/save';
+$route['api/projects/(:any)'] = 'api/projects/$1';
+$route['api/projects/index'] = 'api/projects';
+$route['api/projects'] = 'api/projects';
+$route['projects/(:any)'] = 'projects/$1';
+$route['default_controller'] = 'projects';
 $route['404_override'] = '';
 
 
