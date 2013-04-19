@@ -48,7 +48,9 @@ $route['api/projects/(:any)'] = 'api/projects/$1';
 $route['api/projects/index'] = 'api/projects';
 $route['api/projects'] = 'api/projects';
 $route['projects/(:any)'] = 'projects/$1';
-$route['default_controller'] = 'projects';
+//$route['default_controller'] = 'projects';
+$route['user/(:$any)'] = 'user/$1';
+$route['default_controller'] = 'user';
 $route['404_override'] = '';
 
 

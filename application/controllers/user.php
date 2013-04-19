@@ -14,19 +14,16 @@ class User extends CI_Controller {
     }
 
     public function index() {
-
         if ($this->session->userdata('logged_in')) {
             $session_data = $this->session->userdata('logged_in');
-            $data['username'] = $session_data['username'];
-            $this->load->view('header', $data);
-            $this->load->view('user', $data);
+            redirect(site_url('projects#/'), 'refresh');
         } else {
             $session_data = $this->session->userdata('logged_in');
             //If no session, redirect to login page
             $this->load->view('header');
             $this->load->view('login');
+            $this->load->view('footer');
         }
-        $this->load->view('footer');
     }
 
     public function login() {
@@ -41,14 +38,14 @@ class User extends CI_Controller {
             $this->load->view('footer');
         } else {
             //Go to private area
-            redirect('user', 'refresh');
+            redirect(site_url('projects#/'), 'refresh');
         }
     }
 
     public function logout() {
         $this->session->unset_userdata('logged_in');
         session_destroy();
-        redirect('user', 'refresh');
+        redirect(site_url('projects#/'), 'refresh');
     }
 
     public function check_database($password) {

@@ -1,32 +1,45 @@
 <form name="myForm" class="form-horizontal">
     <div class="control-group" ng-class="{error: myForm.name.$invalid}">
-        <label class="control-label" for="name">Name</label>
+        <label class="control-label" for="name">Item</label>
         <div class="controls">
             <input class="input-xlarge" type="text" name="name" id="name" ng-model="project.name" required>
             <span ng-show="myForm.name.$error.required" class="help-inline">Required</span>
         </div>
     </div>
 
-    <div class="control-group" ng-class="{error: myForm.author.$invalid}">
-        <label class="control-label" for="author">Author</label>
+    <div class="control-group" ng-class="{error: myForm.qty.$invalid}">
+        <label class="control-label" for="qty">Qty</label>
         <div class="controls">
-            <input class="input-xlarge" type="text" name="author" id="author" ng-model="project.author" required>
-            <span ng-show="myForm.author.$error.required" class="help-inline">Required</span>
+            <input class="input-xlarge" type="text" name="qty" id="qty" ng-model="project.qty" required>
+            <span ng-show="myForm.qty.$error.required" class="help-inline">Required</span>
         </div>
     </div>
 
-    <div class="control-group" ng-class="{error: myForm.site.$invalid}">
-        <label class="control-label" for="site">Website</label>
+    <div class="control-group" ng-class="{error: myForm.unit.$invalid}">
+        <label class="control-label" for="unit">Unit</label>
         <div class="controls">
-            <input class="input-xlarge" type="url" name="site" id="site" ng-model="project.site" required>
-            <span ng-show="myForm.site.$error.required" class="help-inline">Required</span>
-            <span ng-show="myForm.site.$error.url" class="help-inline">Not a URL</span>
+            <input class="input-xlarge" type="text" name="unit" id="unit" ng-model="project.unit" required>
+            <span ng-show="myForm.unit.$error.required" class="help-inline">Required</span>
         </div>
     </div>
 
-    <label class="control-label" for="description">Description</label>
+    <div class="control-group">
+        <label class="control-label" for="qty1">Qty1</label>
+        <div class="controls">
+            <input class="input-xlarge" type="text" name="qty1" id="qty1" ng-model="project.qty1" >
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label class="control-label" for="unit1">Unit1</label>
+        <div class="controls">
+            <input class="input-xlarge" type="text" name="unit1" id="unit1" ng-model="project.unit1" >
+        </div>
+    </div>
+
+    <label class="control-label" for="notes">Notes</label>
     <div class="controls">
-        <textarea class="input-xxlarge" name="description" id="description" ng-model="project.description">
+        <textarea class="input-xxlarge" name="notes" id="notes" ng-model="project.notes">
         </textarea>
     </div>
 
