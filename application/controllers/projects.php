@@ -14,6 +14,15 @@ class Projects extends CI_Controller {
     public function template_detail() {
         $this->load->view('detail');
     }
+
+    public function template_inout_list() {
+        $this->load->view('inout_list');
+    }
+
+    public function template_inout_detail() {
+        $this->load->view('inout_detail');
+    }
+
 }
 
 /* End of file projects.php */

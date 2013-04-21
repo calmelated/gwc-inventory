@@ -39,6 +39,7 @@
 */
 
 //$route['(:any)'] = 'system/fix';
+$route['api/projects/$(:any)/(:any)/(:any)'] = 'api/projects/$1/$2/$3';
 $route['api/projects/$(:any)/(:any)'] = 'api/projects/$1/$2';
 //$route['api/projects/$(:any)'] = 'api/projects/$1';
 //$route['api/projects/edit/(:any)'] = 'api/projects/edit/$1';

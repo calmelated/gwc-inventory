@@ -20,7 +20,8 @@
 
             <ul class="nav">
                 <li class="active"><a href="#">Item List</a></li>
-                <li><a href="<?php echo site_url('projects#/new'); ?>">Stock In/Out</a></li>
+                <li><a href="<?php echo site_url('projects#/new'); ?>">New Item</a></li>
+                <li><a href="<?php echo site_url('projects#/inout/add'); ?>">Stock In/Out</a></li>
             </ul>
 
            <a href="user/logout" class="btn btn-info btn-small pull-right" style="margin-top:9px;">Logout</a>
