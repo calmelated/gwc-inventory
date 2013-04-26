@@ -13,17 +13,15 @@ class User extends CI_Controller {
         $this->load->model('user_model', '', true);
     }
 
-    public function index() {
-        if ($this->session->userdata('logged_in')) {
-            $session_data = $this->session->userdata('logged_in');
-            redirect(site_url('projects#/'), 'refresh');
+    public function index($formval = 'true') {
+        $this->load->view('header');
+        if ($formval && $this->session->userdata('logged_in')) {
+            $this->load->view('layout');
         } else {
-            $session_data = $this->session->userdata('logged_in');
             //If no session, redirect to login page
-            $this->load->view('header');
             $this->load->view('login');
-            $this->load->view('footer');
         }
+        $this->load->view('footer');
     }
 
     public function login() {
@@ -32,20 +30,19 @@ class User extends CI_Controller {
         $this->form_validation->set_rules('password', 'Password', 'trim|required|xss_clean|callback_check_database');
 
         if ($this->form_validation->run() == false) {
-            //Field validation failed.  User redirected to login page
-            $this->load->view('header');
-            $this->load->view('login');
-            $this->load->view('footer');
+            $this->index(false);
         } else {
-            //Go to private area
-            redirect(site_url('projects#/'), 'refresh');
+            $this->index(true);
         }
     }
 
     public function logout() {
         $this->session->unset_userdata('logged_in');
+        $this->session->unset_userdata('user_id');
+        $this->session->unset_userdata('user_auth');
+        $this->session->unset_userdata('user_name');
         session_destroy();
-        redirect(site_url('projects#/'), 'refresh');
+        redirect(site_url('/'), 'refresh');
     }
 
     public function check_database($password) {
@@ -55,13 +52,11 @@ class User extends CI_Controller {
         //query the database
         $result = $this->user_model->login($username, $password);
         if ($result) {
-            $sess_array = array();
             foreach ($result as $row) {
-                $sess_array = array (
-                                'id' => $row->id,
-                                'username' => $row->username
-                              );
-                $this->session->set_userdata('logged_in', $sess_array);
+                $this->session->set_userdata('logged_in', true);
+                $this->session->set_userdata('user_id', $row->id);
+                $this->session->set_userdata('user_auth', $row->auth);
+                $this->session->set_userdata('user_name', $row->username);
             }
             return true;
         } else {

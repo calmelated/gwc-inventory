@@ -1,12 +1,12 @@
-angular.module('project', ['projectApi', 'inoutApi']).
+var app = angular.module('project', ['projectApi', 'inoutApi']).
 config(function($routeProvider) {
     $routeProvider.
-    when('/'         , {controller:ListCtrl   , templateUrl:BASE_URL+'projects/template_list'  }).
-    when('/edit/:id' , {controller:EditCtrl   , templateUrl:BASE_URL+'projects/template_detail'}).
-    when('/new'      , {controller:CreateCtrl , templateUrl:BASE_URL+'projects/template_detail'}).
-    when('/inout'    , {controller:ListInOut  , templateUrl:BASE_URL+'projects/template_inout_list'}).
-    when('/inout/add', {controller:CreateInOut, templateUrl:BASE_URL+'projects/template_inout_detail'}).
-    when('/edit/inout/:id', {controller:EditInOut  , templateUrl:BASE_URL+'projects/template_inout_detail'}).
+    when('/'                , {controller:ListCtrl   , templateUrl:BASE_URL+'projects/template_list'        }).
+    when('/edit/:id'        , {controller:EditCtrl   , templateUrl:BASE_URL+'projects/template_detail'      }).
+    when('/new'             , {controller:CreateCtrl , templateUrl:BASE_URL+'projects/template_detail'      }).
+    when('/inout'           , {controller:ListInOut  , templateUrl:BASE_URL+'projects/template_inout_list'  }).
+    when('/inout/add'       , {controller:CreateInOut, templateUrl:BASE_URL+'projects/template_inout_detail'}).
+    when('/inout/:id'       , {controller:EditInOut  , templateUrl:BASE_URL+'projects/template_inout_detail'}).
     otherwise({redirectTo:'/'});
 });
 
@@ -30,28 +30,86 @@ function ListInOut($scope, $location, Project, InOut) {
     };
 }
 
-function CreateCtrl($scope, $location, Project, InOut) {
-    $scope.save = function() {
-        Project.save($scope.project, function(project) {
-            $location.path('/edit/' + project.id);
+function form_validate(form) {
+    $(document).ready(function() {
+        $(form).validate({
+            rules: {
+                type: {
+                    required: true,
+                },
+                name: {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 31
+                },
+                qty: {
+                    required: true,
+                    number: true,
+                    minlength: 1
+                },
+                unit: {
+                    required: true,
+                },
+                qty1: {
+                    number: true
+                },
+                creator: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 16
+                }
+            },
+            onkeyup: false,
+            onblur: true
         });
+    });
+}
+
+function CreateCtrl($scope, $location, Project, InOut) {
+    $scope.types = Project.complete({id:'itemtype'});
+    $scope.units = Project.complete({id:'unit'});
+
+    form_validate("#itemForm");
+
+    $scope.save = function() {
+        if($("#itemForm").valid()) {
+            Project.save($scope.project, function(project) {
+                $location.path('/edit/' + project.id);
+            });
+        }
     };
 }
 
 function CreateInOut($scope, $location, Project, InOut) {
+    $scope.types = Project.complete({id:'itemtype'});
+    $scope.units = Project.complete({id:'unit'});
+    $scope.creators = Project.complete({id:'creator'});
+
+        console.log($scope);
+        $scope.order = new InOut(self.original);
+        console.log($scope.order);
+
+
+    form_validate("#orderForm");
+
     $scope.save = function() {
-        InOut.save($scope.order, function(order) {
-            $location.path('/inout/' + order.id);
-        });
+        if($("#orderForm").valid()) {
+            InOut.save($scope.order, function(order) {
+                $location.path('/inout/' + order.id);
+            });
+        }
     };
 }
 
 function EditCtrl($scope, $location, $routeParams, Project, InOut) {
-    var self = this;
+    $scope.types = Project.complete({id:'itemtype'});
+    $scope.units = Project.complete({id:'unit'});
 
+    var self = this;
     Project.get({id: $routeParams.id}, function(project) {
         self.original = project;
         $scope.project = new Project(self.original);
+        $scope.moreunit = (project.unit1 == "" && project.qty1 == 0) ? 0 : 1;
     });
 
     $scope.isClean = function() {
@@ -64,19 +122,27 @@ function EditCtrl($scope, $location, $routeParams, Project, InOut) {
         });
     };
 
+    form_validate("#itemForm");
+
     $scope.save = function() {
-        $scope.project.update(function() {
-            $location.path('/');
-        });
+        if($("#itemForm").valid()) {
+            $scope.project.update(function() {
+                $location.path('/');
+            });
+        }
     };
 }
 
 function EditInOut($scope, $location, $routeParams, Project, InOut) {
+    $scope.types = Project.complete({id:'itemtype'});
+    $scope.units = Project.complete({id:'unit'});
+
     var self = this;
 
     InOut.get({id: $routeParams.id}, function(order) {
         self.original = order;
         $scope.order = new InOut(self.original);
+        $scope.moreunit = (order.unit1 == "" && order.qty1 == 0) ? 0 : 1;
     });
 
     $scope.isClean = function() {
@@ -89,20 +155,25 @@ function EditInOut($scope, $location, $routeParams, Project, InOut) {
         });
     };
 
+    form_validate("#orderForm");
+
     $scope.save = function() {
-        $scope.order.update(function() {
-            $location.path('/inout');
-        });
+        if($("#orderForm").valid()) {
+            $scope.order.update(function() {
+                $location.path('/inout');
+            });
+        }
     };
 }
 
 angular.module('projectApi', ['ngResource']).
 factory('Project', function($resource) {
     var Project = $resource(BASE_URL + 'api/projects/:method/projects/:id', {}, {
-        query:  {method:'GET'   , params: {method:'index' } , isArray:true},
-        save:   {method:'POST'  , params: {method:'save'  }},
-        get:    {method:'GET'   , params: {method:'edit'  }},
-        remove: {method:'DELETE', params: {method:'remove'}}
+        query:    {method:'GET'   , params: {method:'index'     } , isArray:true},
+        save:     {method:'POST'  , params: {method:'save'      }},
+        get:      {method:'GET'   , params: {method:'edit'      }},
+        complete: {method:'GET'   , params: {method:'complete'  } , isArray:true},
+        remove:   {method:'DELETE', params: {method:'remove'    }}
     });
 
     Project.prototype.update = function(cb) {

@@ -27,7 +27,7 @@ class Project_model extends CI_Model {
                     'unit'  => (!isset($data['unit'] )) ? '' : $data['unit'] ,
                     'qty1'  => (!isset($data['qty1'] )) ? 0  : $data['qty1'] ,
                     'unit1' => (!isset($data['unit1'])) ? '' : $data['unit1'],
-                    'notes' => (!isset($data['notes'])) ? '' : $data['notes'],
+                    'desc'  => (!isset($data['desc'] )) ? '' : $data['desc'],
                 );
                 $this->db->insert(DEFAULT_TABLE, $data_);
             } else {
@@ -71,6 +71,61 @@ class Project_model extends CI_Model {
         // remove the record
         $this->db->where('id', $id)->delete($dbtable);
         return $this->db->affected_rows();
+    }
+
+    public function get_autocomplete($type) {
+        if($type == "items") {
+            return $this->db->select('name')->distinct()->get(DEFAULT_TABLE)->result();
+        } else if($type == "itemtype") {
+            return $this->db->select('name')->get_where('completes', array('type' => $type))->result();
+        } else if($type == "unit") {
+            return $this->db->select('name')->get_where('completes', array('type' => $type))->result();
+        } else if($type == "creator") {
+            return array(array('name' => $this->session->userdata['user_name']));
+        }
+    }
+
+    public function import_items($fp) {
+        $handle = fopen($fp, "r");
+        while (!feof($handle)) {
+            $line = fgets($handle);
+            $cols = explode("\t", $line);
+            if(strlen($cols[0]) < 1 ||
+               strlen($cols[1]) < 1 ||
+               strlen($cols[2]) < 1 ||
+               $cols[3] == 'YES'    ||
+               $cols[3] == 'yes'    ||
+               $cols[0] == 'Item'     ) {
+                //print 'ignore -> <br>';
+                //var_dump($cols);
+                continue;
+            }
+
+            //splite RAW:123 -> type:RAW, item:123
+            $cols_ = explode(':', $cols[0]);
+            if(count($cols_) != 2) {
+                //print 'ignore -> <br>';
+                //var_dump($cols_);
+                continue;
+            }
+            list($type, $item) = $cols_;
+
+            // for number: "123.456" -> number:123.456
+            if($cols[2][0] == '"') {
+                $num = substr($cols[2], 1, strlen($cols[2])-2);
+            } else {
+                $num = $cols[2];
+            }
+
+            print 'Import Type: ' . $type . ', Itme: ' . $item . ', Desc: ' . $cols[1] . ', Number: ' . $num . '<br>';
+            $this->db->insert(DEFAULT_TABLE, array(
+                    "type" => $type,
+                    "name" => $item,
+                    "desc" => $cols[1],
+                    "qty"  => $num)
+                    );
+        }
+        fclose($handle);
     }
 
 }

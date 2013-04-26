@@ -28,4 +28,5 @@
     <div style="margin-left:170px;">
         <?php echo '<div style="color:red">'.validation_errors().'</div>'; ?>
     </div>
+
 </div>

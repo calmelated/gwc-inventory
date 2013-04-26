@@ -14,6 +14,10 @@ class Projects extends REST_Controller {
         $this->load->model('project_model');
     }
 
+    public function complete_get($dbtable = 'projects', $id = NULL) {
+        $this->response($this->project_model->get_autocomplete($id));
+    }
+
     public function index_get($dbtable = 'projects') {
         $this->response($this->project_model->get_all($dbtable));
     }

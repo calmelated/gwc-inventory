@@ -51,6 +51,8 @@ $route['api/projects'] = 'api/projects';
 $route['projects/(:any)'] = 'projects/$1';
 //$route['default_controller'] = 'projects';
 $route['user/(:$any)'] = 'user/$1';
+$route['fileup/(:$any)'] = 'fileup/$1';
+$route['fileup'] = 'fileup';
 $route['default_controller'] = 'user';
 $route['404_override'] = '';
 

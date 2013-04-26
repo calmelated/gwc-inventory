@@ -7,24 +7,27 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
-            <!--
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
-            --!>
             <a class="nav brand" href="<?php echo site_url('projects#/'); ?>">
                 <img src="img/logo.png" height=60 width=60 />
             </a>
 
             <ul class="nav">
-                <li class="active"><a href="#">Item List</a></li>
+                <li class="active"><a href="#/">Item List</a></li>
                 <li><a href="<?php echo site_url('projects#/new'); ?>">New Item</a></li>
                 <li><a href="<?php echo site_url('projects#/inout/add'); ?>">Stock In/Out</a></li>
             </ul>
 
-           <a href="user/logout" class="btn btn-info btn-small pull-right" style="margin-top:9px;">Logout</a>
+            <div class="btn-group pull-right" style="margin-top:9px;">
+                <a class="btn btn-info btn-small dropdown-toggle" data-toggle="dropdown" href="#">
+                    Hi, <?=$this->session->userdata['user_name']?>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <!-- dropdown menu links -->
+                    <li><a href="user/logout">Logout</a></li>
+                </ul>
+            </div>
+
         </div>
     </div>
 </div>
